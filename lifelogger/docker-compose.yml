@@ -1,0 +1,27 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://lifelogger:lifelogger@db:5432/lifelogger
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=lifelogger
+      - POSTGRES_PASSWORD=lifelogger
+      - POSTGRES_DB=lifelogger
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lifelogger"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

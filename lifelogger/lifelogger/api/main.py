@@ -1,7 +1,11 @@
 """FastAPI application for lifelogger."""
 
-from fastapi import FastAPI
+from pathlib import Path
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from lifelogger.api.routes import entries, cards, stats
 
@@ -26,13 +30,31 @@ app.include_router(cards.router)
 app.include_router(stats.router)
 
 
-@app.get("/")
-def root():
-    """Health check endpoint."""
-    return {"status": "ok", "service": "lifelogger"}
-
-
 @app.get("/health")
 def health():
     """Health check endpoint."""
     return {"status": "healthy"}
+
+
+# Serve static frontend if available (production build)
+STATIC_DIR = Path(__file__).parent.parent.parent / "static"
+
+if STATIC_DIR.exists():
+    # Serve static assets
+    app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")
+
+    # Catch-all route for SPA - must be after API routes
+    @app.get("/{path:path}")
+    async def serve_spa(request: Request, path: str):
+        """Serve the SPA for any non-API route."""
+        # If it's an API route that wasn't matched, return 404
+        if path.startswith("entries") or path.startswith("cards") or path.startswith("stats"):
+            return {"error": "Not found"}
+        # Serve index.html for all other routes (SPA handles routing)
+        return FileResponse(STATIC_DIR / "index.html")
+else:
+    # No static files - API only mode
+    @app.get("/")
+    def root():
+        """Health check endpoint."""
+        return {"status": "ok", "service": "lifelogger", "mode": "api-only"}
