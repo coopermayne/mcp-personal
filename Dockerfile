@@ -27,11 +27,15 @@ COPY alembic.ini ./
 # Copy built frontend
 COPY --from=frontend-build /app/frontend/dist ./static
 
+# Copy startup script
+COPY start.sh ./
+RUN chmod +x start.sh
+
 # Create non-root user
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
 EXPOSE 8000
 
-# Run migrations and start server
-CMD ["sh", "-c", "alembic upgrade head && uvicorn lifelogger.api.main:app --host 0.0.0.0 --port 8000"]
+# Run migrations and start server (with retry for database readiness)
+CMD ["./start.sh"]
