@@ -15,6 +15,9 @@ def get_database_url() -> str:
     url = os.environ.get("DATABASE_URL")
     if not url:
         raise ValueError("DATABASE_URL environment variable is not set")
+    # Fix for Coolify/Heroku/Railway which use postgres:// but SQLAlchemy requires postgresql://
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql://", 1)
     return url
 
 
