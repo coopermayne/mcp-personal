@@ -24,10 +24,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(entries.router)
-app.include_router(cards.router)
-app.include_router(stats.router)
+# Include routers with /api prefix for production
+app.include_router(entries.router, prefix="/api")
+app.include_router(cards.router, prefix="/api")
+app.include_router(stats.router, prefix="/api")
 
 
 @app.get("/health")
@@ -48,7 +48,7 @@ if STATIC_DIR.exists():
     async def serve_spa(request: Request, path: str):
         """Serve the SPA for any non-API route."""
         # If it's an API route that wasn't matched, return 404
-        if path.startswith("entries") or path.startswith("cards") or path.startswith("stats"):
+        if path.startswith("api/"):
             return {"error": "Not found"}
         # Serve index.html for all other routes (SPA handles routing)
         return FileResponse(STATIC_DIR / "index.html")
