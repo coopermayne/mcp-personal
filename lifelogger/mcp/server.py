@@ -411,8 +411,8 @@ def browse_cards(arguments: dict[str, Any]) -> dict[str, Any]:
         }
 
 
-async def main():
-    """Run the MCP server."""
+async def main_async():
+    """Run the MCP server (async)."""
     async with stdio_server() as (read_stream, write_stream):
         await server.run(
             read_stream,
@@ -421,6 +421,11 @@ async def main():
         )
 
 
-if __name__ == "__main__":
+def main():
+    """Run the MCP server."""
     import asyncio
-    asyncio.run(main())
+    asyncio.run(main_async())
+
+
+if __name__ == "__main__":
+    main()

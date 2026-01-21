@@ -28,5 +28,8 @@ dev = [
     "httpx>=0.26.0",
 ]
 
+[project.scripts]
+lifelogger-mcp = "lifelogger.mcp.server:main"
+
 [tool.hatch.build.targets.wheel]
 packages = ["lifelogger"]
